@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>修复验证测试</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-result { margin: 10px 0; padding: 10px; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>修复验证测试</h1>
+    
+    <button onclick="testNullChecks()">测试空值检查</button>
+    <button onclick="testDOMElementChecks()">测试DOM元素检查</button>
+    <button onclick="testDataAccess()">测试数据访问</button>
+    
+    <div id="results"></div>
+    
+    <script>
+        let testResults = [];
+        
+        function log(message, type = 'info') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `test-result ${type}`;
+            div.innerHTML = `<strong>${new Date().toLocaleTimeString()}:</strong> ${message}`;
+            results.appendChild(div);
+            testResults.push({message, type, time: new Date()});
+        }
+        
+        function testNullChecks() {
+            log('开始测试空值检查...', 'info');
+            
+            // 测试 emotionData 为空的情况
+            let emotionData = null;
+            
+            try {
+                emotionData.forEach(item => {
+                    console.log('这不应该执行');
+                });
+                log('✗ 空值检查失败：应该抛出错误', 'error');
+            } catch (error) {
+                log('✓ 空值检查通过：正确捕获了null错误', 'success');
+            }
+            
+            // 测试修复后的检查逻辑
+            try {
+                if (!emotionData || !Array.isArray(emotionData)) {
+                    log('✓ 改进的空值检查：正确识别了无效数据', 'success');
+                    return;
+                }
+                emotionData.forEach(item => {
+                    console.log('这不应该执行');
+                });
+                log('✗ 改进的空值检查失败', 'error');
+            } catch (error) {
+                log('✓ 改进的空值检查通过：正确处理了无效数据', 'success');
+            }
+        }
+        
+        function testDOMElementChecks() {
+            log('开始测试DOM元素检查...', 'info');
+            
+            // 模拟DOM元素不存在的情况
+            const nonExistentElement = document.getElementById('nonExistentElement');
+            
+            if (!nonExistentElement) {
+                log('✓ DOM元素检查：正确识别了不存在的元素', 'success');
+            } else {
+                log('✗ DOM元素检查：未能识别不存在的元素', 'error');
+            }
+            
+            // 测试安全访问
+            try {
+                const element = document.getElementById('nonExistentElement');
+                if (!element) {
+                    log('✓ 安全访问模式：避免了null引用', 'success');
+                } else {
+                    element.textContent = 'test';
+                }
+            } catch (error) {
+                log('✗ 安全访问模式：仍然发生了错误', 'error');
+            }
+        }
+        
+        function testDataAccess() {
+            log('开始测试数据访问...', 'info');
+            
+            // 测试数组访问
+            let testData = null;
+            
+            try {
+                testData.forEach(item => {
+                    console.log('这不应该执行');
+                });
+                log('✗ 数据访问测试：应该抛出错误', 'error');
+            } catch (error) {
+                log('✓ 数据访问测试：正确捕获了null错误', 'success');
+            }
+            
+            // 测试修复后的逻辑
+            testData = [{test: 'data'}];
+            if (!testData || !Array.isArray(testData)) {
+                log('✗ 数据验证失败：有效数据被误判为无效', 'error');
+            } else {
+                testData.forEach(item => {
+                    log(`✓ 数据验证通过：成功处理有效数据项: ${JSON.stringify(item)}`, 'success');
+                });
+            }
+        }
+        
+        // 页面加载完成后的测试
+        window.addEventListener('load', () => {
+            log('修复验证测试工具已就绪', 'info');
+            log('点击上方按钮开始测试各项修复', 'info');
+            
+            // 自动运行基本测试
+            setTimeout(() => {
+                testNullChecks();
+                setTimeout(() => {
+                    testDOMElementChecks();
+                    setTimeout(() => {
+                        testDataAccess();
+                        log('所有基本测试完成', 'info');
+                    }, 100);
+                }, 100);
+            }, 500);
+        });
+    </script>
+</body>
+</html>

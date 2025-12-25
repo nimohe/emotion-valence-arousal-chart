@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据加载测试</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-result { margin: 10px 0; padding: 10px; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 5px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>数据加载测试工具</h1>
+    
+    <button onclick="testDataLoading()">测试数据加载</button>
+    <button onclick="testDataStructure()">测试数据结构</button>
+    <button onclick="showDataSummary()">显示数据摘要</button>
+    <button onclick="clearResults()">清除结果</button>
+    
+    <div id="results"></div>
+    
+    <script>
+        let testData = null;
+        
+        function log(message, type = 'info') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `test-result ${type}`;
+            div.innerHTML = message;
+            results.appendChild(div);
+        }
+        
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+        }
+        
+        async function testDataLoading() {
+            log('开始测试数据加载...', 'info');
+            
+            try {
+                const response = await fetch('assets/json/data.json');
+                log(`HTTP状态: ${response.status} ${response.statusText}`, 'info');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                testData = data;
+                
+                log(`✓ 数据加载成功！`, 'success');
+                log(`数据类型: ${typeof data}`, 'info');
+                log(`数据长度: ${Array.isArray(data) ? data.length : '非数组'}`, 'info');
+                
+            } catch (error) {
+                log(`✗ 数据加载失败: ${error.message}`, 'error');
+                console.error('详细错误:', error);
+            }
+        }
+        
+        async function testDataStructure() {
+            if (!testData) {
+                await testDataLoading();
+            }
+            
+            if (!testData) {
+                log('无法进行数据结构测试：数据未加载', 'error');
+                return;
+            }
+            
+            log('开始测试数据结构...', 'info');
+            
+            try {
+                if (!Array.isArray(testData)) {
+                    throw new Error('数据不是数组格式');
+                }
+                
+                if (testData.length === 0) {
+                    throw new Error('数据数组为空');
+                }
+                
+                let totalWords = 0;
+                const categories = new Set();
+                const levels = new Set();
+                let invalidItems = [];
+                
+                testData.forEach((item, index) => {
+                    if (!item.category || !item.level || !Array.isArray(item.words)) {
+                        invalidItems.push(`第${index + 1}项: 缺少必要字段`);
+                        return;
+                    }
+                    
+                    categories.add(item.category);
+                    levels.add(item.level);
+                    
+                    item.words.forEach((word, wordIndex) => {
+                        if (!word.word || !Array.isArray(word.coord) || word.coord.length !== 2) {
+                            invalidItems.push(`第${index + 1}项第${wordIndex + 1}词: 数据结构不完整`);
+                            return;
+                        }
+                        
+                        const [x, y] = word.coord;
+                        if (typeof x !== 'number' || typeof y !== 'number') {
+                            invalidItems.push(`词汇"${word.word}": 坐标不是数字`);
+                        }
+                        
+                        if (x < -1 || x > 1 || y < -1 || y > 1) {
+                            invalidItems.push(`词汇"${word.word}": 坐标超出范围[-1,1]`);
+                        }
+                        
+                        totalWords++;
+                    });
+                });
+                
+                if (invalidItems.length > 0) {
+                    log(`✗ 发现${invalidItems.length}个问题:`, 'error');
+                    invalidItems.forEach(issue => log(`  - ${issue}`, 'error'));
+                } else {
+                    log('✓ 数据结构验证通过！', 'success');
+                }
+                
+                log(`统计信息:`, 'info');
+                log(`  - 类别数: ${categories.size}`, 'info');
+                log(`  - 强度等级数: ${levels.size}`, 'info');
+                log(`  - 总词汇数: ${totalWords}`, 'info');
+                
+            } catch (error) {
+                log(`✗ 数据结构验证失败: ${error.message}`, 'error');
+            }
+        }
+        
+        async function showDataSummary() {
+            if (!testData) {
+                await testDataLoading();
+            }
+            
+            if (!testData) {
+                log('无法显示数据摘要：数据未加载', 'error');
+                return;
+            }
+            
+            log('数据摘要:', 'info');
+            
+            const summary = {
+                总类别数: testData.length,
+                类别列表: testData.map(item => item.category),
+                强度等级: [...new Set(testData.map(item => item.level))],
+                总词汇数: testData.reduce((sum, item) => sum + item.words.length, 0)
+            };
+            
+            log('<pre>' + JSON.stringify(summary, null, 2) + '</pre>', 'info');
+            
+            // 显示每个类别的详细信息
+            log('各类别详细统计:', 'info');
+            testData.forEach(category => {
+                const categoryInfo = {
+                    类别: category.category,
+                    强度: category.level,
+                    词汇数: category.words.length,
+                    示例词汇: category.words.slice(0, 3).map(w => w.word)
+                };
+                log(`<pre>${JSON.stringify(categoryInfo, null, 2)}</pre>`, 'info');
+            });
+        }
+        
+        // 页面加载时自动测试
+        window.addEventListener('load', () => {
+            log('数据加载测试工具已就绪', 'info');
+            log('点击上方按钮开始测试', 'info');
+        });
+    </script>
+</body>
+</html>
