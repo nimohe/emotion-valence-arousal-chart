@@ -85,7 +85,7 @@ async function loadEmotionData() {
         showLoadingState(true);
 
         // 尝试从外部JSON文件加载数据
-        const response = await fetch('assets/json/data.json');
+        const response = await fetch('./assets/json/data.json');
 
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
