@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>响应式设计测试 - 情绪可视化</title>
+    <link rel="stylesheet" href="./assets/css/index.css">
+    <style>
+        .test-info {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 12px;
+            z-index: 10000;
+            max-width: 300px;
+        }
+        
+        .breakpoint-indicator {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-left: 5px;
+            font-weight: bold;
+        }
+        
+        .breakpoint-desktop { background: #4CAF50; }
+        .breakpoint-tablet { background: #FF9800; }
+        .breakpoint-mobile { background: #2196F3; }
+        .breakpoint-small { background: #9C27B0; }
+        
+        .resize-handle {
+            position: fixed;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 20px;
+            background: linear-gradient(90deg, transparent, rgba(0,0,0,0.1));
+            cursor: ew-resize;
+            z-index: 10001;
+        }
+        
+        @media (max-width: 1200px) {
+            .test-info::after { content: "桌面布局"; .breakpoint-indicator; }
+        }
+        
+        @media (max-width: 991px) {
+            .test-info::after { content: "平板布局"; }
+        }
+        
+        @media (max-width: 767px) {
+            .test-info::after { content: "手机布局"; }
+        }
+        
+        @media (max-width: 575px) {
+            .test-info::after { content: "小屏手机"; }
+        }
+        
+        @media (max-width: 375px) {
+            .test-info::after { content: "超小屏"; }
+        }
+    </style>
+</head>
+<body>
+    <div class="test-info">
+        <div>屏幕尺寸: <span id="screenSize"></span></div>
+        <div>设备像素比: <span id="devicePixelRatio"></span></div>
+        <div>触摸支持: <span id="touchSupport"></span></div>
+        <div>当前断点: <span id="breakpoint" class="breakpoint-indicator"></span></div>
+        <div>方向: <span id="orientation"></span></div>
+    </div>
+    
+    <div class="resize-handle" title="拖动调整窗口大小测试响应式效果"></div>
+    
+    <div class="container">
+        <header>
+            <h1>响应式设计测试页面</h1>
+            <p class="subtitle">这个页面用于测试和验证情绪可视化项目的响应式设计效果。调整浏览器窗口大小或在不同设备上查看以测试不同断点的显示效果。</p>
+        </header>
+        
+        <div class="main-content">
+            <div class="visualization-section">
+                <h2 class="section-title">图表区域测试</h2>
+                <div class="chart-container" id="chart" style="background: linear-gradient(45deg, #f0f0f0 25%, transparent 25%, transparent 75%, #f0f0f0 75%, #f0f0f0), linear-gradient(45deg, #f0f0f0 25%, transparent 25%, transparent 75%, #f0f0f0 75%, #f0f0f0); background-size: 20px 20px; background-position: 0 0, 10px 10px; display: flex; align-items: center; justify-content: center; color: #666; font-size: 18px;">
+                    图表容器区域
+                    <br>
+                    <small>当前高度: <span id="chartHeight">600px</span></small>
+                </div>
+                
+                <div class="instructions">
+                    <h3>测试说明：</h3>
+                    <ul>
+                        <li><strong>桌面端</strong>：侧边栏布局，完整功能</li>
+                        <li><strong>平板端</strong>：垂直布局，触摸优化</li>
+                        <li><strong>手机端</strong>：单列布局，按钮全宽</li>
+                        <li><strong>小屏端</strong>：精简布局，最小尺寸</li>
+                    </ul>
+                    <p>👆 调整浏览器窗口大小查看布局变化</p>
+                </div>
+            </div>
+            
+            <div class="controls-section">
+                <div class="controls">
+                    <h2 class="section-title">按钮布局测试</h2>
+                    
+                    <div class="control-group">
+                        <label>类别筛选器 (响应式布局)：</label>
+                        <div class="category-filter" id="categoryFilter">
+                            <button class="category-btn active">开心</button>
+                            <button class="category-btn">悲伤</button>
+                            <button class="category-btn">愤怒</button>
+                            <button class="category-btn">恐惧</button>
+                            <button class="category-btn">惊讶</button>
+                            <button class="category-btn">厌恶</button>
+                        </div>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label>强度筛选器 (响应式布局)：</label>
+                        <div class="level-filter">
+                            <button class="level-btn active">全部</button>
+                            <button class="level-btn">轻微</button>
+                            <button class="level-btn">中等</button>
+                            <button class="level-btn">强烈</button>
+                        </div>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label>图例测试：</label>
+                        <div class="legend" id="legend">
+                            <div class="legend-item">
+                                <span class="legend-color" style="background: #FF6B6B;"></span>
+                                <span>开心情绪</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-color" style="background: #4ECDC4;"></span>
+                                <span>悲伤情绪</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-color" style="background: #45B7D1;"></span>
+                                <span>愤怒情绪</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-color" style="background: #96CEB4;"></span>
+                                <span>恐惧情绪</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="controls">
+                    <h2 class="section-title">文字大小测试</h2>
+                    <p>H1标题大小：<span id="h1Size">--</span></p>
+                    <p>副标题大小：<span id="subtitleSize">--</span></p>
+                    <p>段落文字大小：<span id="paragraphSize">--</span></p>
+                    <p>按钮文字大小：<span id="buttonSize">--</span></p>
+                </div>
+                
+                <div class="controls">
+                    <h2 class="section-title">触摸测试</h2>
+                    <p>触摸事件：<span id="touchEvents">等待触摸...</span></p>
+                    <p>按钮尺寸：<span id="buttonSize">--</span></p>
+                    <p>最小触摸目标：<span id="touchTarget">44×44px</span></p>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>响应式设计测试页面 | 支持多种设备断点 | 触摸友好设计</p>
+        </footer>
+    </div>
+
+    <script>
+        // 更新屏幕信息
+        function updateScreenInfo() {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            const dpr = window.devicePixelRatio || 1;
+            const touchSupport = 'ontouchstart' in window;
+            
+            document.getElementById('screenSize').textContent = `${width}×${height}`;
+            document.getElementById('devicePixelRatio').textContent = dpr;
+            document.getElementById('touchSupport').textContent = touchSupport ? '✅ 支持' : '❌ 不支持';
+            document.getElementById('orientation').textContent = width > height ? '横屏' : '竖屏';
+            
+            // 更新断点指示
+            const breakpoint = document.getElementById('breakpoint');
+            let breakpointText = '';
+            let breakpointClass = '';
+            
+            if (width <= 375) {
+                breakpointText = '超小屏';
+                breakpointClass = 'breakpoint-small';
+            } else if (width <= 575) {
+                breakpointText = '小屏手机';
+                breakpointClass = 'breakpoint-mobile';
+            } else if (width <= 767) {
+                breakpointText = '手机';
+                breakpointClass = 'breakpoint-mobile';
+            } else if (width <= 991) {
+                breakpointText = '平板';
+                breakpointClass = 'breakpoint-tablet';
+            } else {
+                breakpointText = '桌面';
+                breakpointClass = 'breakpoint-desktop';
+            }
+            
+            breakpoint.textContent = breakpointText;
+            breakpoint.className = `breakpoint-indicator ${breakpointClass}`;
+            
+            // 更新图表容器高度
+            const chartContainer = document.querySelector('.chart-container');
+            const computedHeight = window.getComputedStyle(chartContainer).height;
+            document.getElementById('chartHeight').textContent = computedHeight;
+        }
+        
+        // 更新字体大小信息
+        function updateFontSizes() {
+            const h1 = document.querySelector('h1');
+            const subtitle = document.querySelector('.subtitle');
+            const paragraph = document.querySelector('.instructions p');
+            const button = document.querySelector('.category-btn');
+            
+            const h1Computed = window.getComputedStyle(h1).fontSize;
+            const subtitleComputed = window.getComputedStyle(subtitle).fontSize;
+            const paragraphComputed = window.getComputedStyle(paragraph).fontSize;
+            const buttonComputed = window.getComputedStyle(button).fontSize;
+            
+            document.getElementById('h1Size').textContent = h1Computed;
+            document.getElementById('subtitleSize').textContent = subtitleComputed;
+            document.getElementById('paragraphSize').textContent = paragraphComputed;
+            document.getElementById('buttonSize').textContent = buttonComputed;
+        }
+        
+        // 添加触摸事件监听
+        function setupTouchEvents() {
+            let touchCount = 0;
+            
+            document.addEventListener('touchstart', function(e) {
+                touchCount++;
+                document.getElementById('touchEvents').textContent = `触摸开始 (${touchCount}次)`;
+            });
+            
+            document.addEventListener('touchend', function(e) {
+                document.getElementById('touchEvents').textContent = `触摸结束 (${touchCount}次)`;
+            });
+            
+            document.addEventListener('touchmove', function(e) {
+                document.getElementById('touchEvents').textContent = `触摸移动中...`;
+            });
+        }
+        
+        // 测试按钮尺寸
+        function testButtonSizes() {
+            const buttons = document.querySelectorAll('.category-btn, .level-btn');
+            buttons.forEach(button => {
+                const rect = button.getBoundingClientRect();
+                const width = Math.round(rect.width);
+                const height = Math.round(rect.height);
+                
+                button.addEventListener('click', function() {
+                    console.log(`按钮尺寸: ${width}×${height}px`);
+                });
+            });
+        }
+        
+        // 窗口大小调整时的优化
+        let resizeTimeout;
+        function handleResize() {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                updateScreenInfo();
+                updateFontSizes();
+            }, 100);
+        }
+        
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            updateScreenInfo();
+            updateFontSizes();
+            setupTouchEvents();
+            testButtonSizes();
+            
+            window.addEventListener('resize', handleResize);
+            window.addEventListener('orientationchange', function() {
+                setTimeout(updateScreenInfo, 100);
+            });
+            
+            // 添加窗口大小调整功能
+            const resizeHandle = document.querySelector('.resize-handle');
+            let isResizing = false;
+            let startX = 0;
+            let startWidth = 0;
+            
+            resizeHandle.addEventListener('mousedown', function(e) {
+                isResizing = true;
+                startX = e.clientX;
+                startWidth = window.innerWidth;
+                document.body.style.cursor = 'ew-resize';
+                e.preventDefault();
+            });
+            
+            document.addEventListener('mousemove', function(e) {
+                if (!isResizing) return;
+                
+                const diff = e.clientX - startX;
+                const newWidth = Math.max(300, startWidth - diff);
+                
+                // 模拟窗口大小调整（仅用于演示）
+                console.log(`模拟窗口宽度: ${newWidth}px`);
+            });
+            
+            document.addEventListener('mouseup', function() {
+                isResizing = false;
+                document.body.style.cursor = 'default';
+            });
+        });
+    </script>
+</body>
+</html>

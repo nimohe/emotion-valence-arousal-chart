@@ -243,9 +243,449 @@ footer {
     margin-top: 20px;
 }
 
+/* ===== 响应式设计 ===== */
+
+/* 大屏幕桌面 (1201px+) */
+@media (min-width: 1201px) {
+    .container {
+        max-width: 1600px;
+        padding: 20px;
+    }
+    
+    h1 {
+        font-size: 2.5rem;
+    }
+    
+    .chart-container {
+        height: 600px;
+    }
+}
+
+/* 中等屏幕桌面 (992px - 1200px) */
 @media (max-width: 1200px) {
     .main-content {
         flex-direction: column;
+    }
+    
+    .visualization-section,
+    .controls-section {
+        min-width: 100%;
+    }
+    
+    .chart-container {
+        height: 500px;
+    }
+    
+    h1 {
+        font-size: 2.2rem;
+    }
+    
+    .subtitle {
+        font-size: 1.1rem;
+    }
+}
+
+/* 平板设备 (768px - 991px) */
+@media (max-width: 991px) {
+    body {
+        padding: 15px;
+    }
+    
+    .container {
+        gap: 15px;
+    }
+    
+    header {
+        padding: 15px;
+    }
+    
+    h1 {
+        font-size: 2rem;
+    }
+    
+    .subtitle {
+        font-size: 1rem;
+    }
+    
+    .visualization-section,
+    .controls-section {
+        padding: 15px;
+    }
+    
+    .chart-container {
+        height: 450px;
+    }
+    
+    .section-title {
+        font-size: 1.3rem;
+    }
+    
+    .category-btn {
+        padding: 5px 10px;
+        font-size: 0.85rem;
+    }
+    
+    .level-btn {
+        padding: 6px 12px;
+        font-size: 0.85rem;
+    }
+    
+    /* 触摸友好的按钮尺寸 */
+    .category-btn,
+    .level-btn {
+        min-height: 44px; /* Apple推荐的最小触摸目标 */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .instructions {
+        padding: 12px;
+        font-size: 0.9rem;
+    }
+    
+    .tooltip {
+        font-size: 0.8rem;
+        max-width: 200px;
+    }
+}
+
+/* 大屏手机 (576px - 767px) */
+@media (max-width: 767px) {
+    body {
+        padding: 10px;
+    }
+    
+    .container {
+        gap: 12px;
+    }
+    
+    header {
+        padding: 12px;
+    }
+    
+    h1 {
+        font-size: 1.8rem;
+        line-height: 1.2;
+    }
+    
+    .subtitle {
+        font-size: 0.95rem;
+        line-height: 1.4;
+    }
+    
+    .visualization-section,
+    .controls-section {
+        padding: 12px;
+    }
+    
+    .chart-container {
+        height: 350px;
+    }
+    
+    .section-title {
+        font-size: 1.2rem;
+    }
+    
+    /* 垂直布局的控制按钮 */
+    .category-filter {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+        gap: 8px;
+    }
+    
+    .level-filter {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .category-btn,
+    .level-btn {
+        width: 100%;
+        min-height: 48px;
+        font-size: 0.9rem;
+    }
+    
+    /* 移动端图例优化 */
+    .legend {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
+    
+    .legend-item {
+        font-size: 0.85rem;
+    }
+    
+    /* 移动端说明文字优化 */
+    .instructions {
+        padding: 10px;
+        font-size: 0.85rem;
+    }
+    
+    .instructions h3 {
+        font-size: 1rem;
+    }
+    
+    /* 移动端工具提示优化 */
+    .tooltip {
+        font-size: 0.75rem;
+        max-width: 180px;
+        padding: 8px;
+    }
+    
+    /* 移动端数据统计优化 */
+    #dataStats {
+        font-size: 0.85rem;
+        padding: 8px;
+    }
+    
+    /* 移动端页脚优化 */
+    footer {
+        font-size: 0.8rem;
+        padding: 15px;
+    }
+}
+
+/* 小屏手机 (最大575px) */
+@media (max-width: 575px) {
+    body {
+        padding: 8px;
+    }
+    
+    .container {
+        gap: 10px;
+    }
+    
+    header {
+        padding: 10px;
+    }
+    
+    h1 {
+        font-size: 1.5rem;
+    }
+    
+    .subtitle {
+        font-size: 0.9rem;
+    }
+    
+    .visualization-section,
+    .controls-section {
+        padding: 10px;
+    }
+    
+    .chart-container {
+        height: 300px;
+    }
+    
+    .section-title {
+        font-size: 1.1rem;
+    }
+    
+    /* 小屏按钮布局 */
+    .category-filter {
+        grid-template-columns: 1fr;
+        gap: 6px;
+    }
+    
+    .category-btn,
+    .level-btn {
+        min-height: 44px;
+        font-size: 0.85rem;
+    }
+    
+    /* 小屏图例 */
+    .legend {
+        grid-template-columns: 1fr;
+        gap: 6px;
+    }
+    
+    .legend-item {
+        font-size: 0.8rem;
+    }
+    
+    /* 小屏说明 */
+    .instructions {
+        padding: 8px;
+        font-size: 0.8rem;
+    }
+    
+    .instructions h3 {
+        font-size: 0.95rem;
+    }
+    
+    .instructions ul {
+        padding-left: 15px;
+    }
+    
+    /* 小屏工具提示 */
+    .tooltip {
+        font-size: 0.7rem;
+        max-width: 160px;
+        padding: 6px;
+    }
+    
+    /* 小屏页脚 */
+    footer {
+        font-size: 0.75rem;
+        padding: 12px;
+    }
+}
+
+/* 超小屏设备 (最大375px) */
+@media (max-width: 375px) {
+    h1 {
+        font-size: 1.3rem;
+    }
+    
+    .subtitle {
+        font-size: 0.85rem;
+    }
+    
+    .chart-container {
+        height: 250px;
+    }
+    
+    .category-btn,
+    .level-btn {
+        font-size: 0.8rem;
+        padding: 8px 12px;
+    }
+    
+    .section-title {
+        font-size: 1rem;
+    }
+}
+
+/* ===== 触摸设备优化 ===== */
+
+/* 触摸设备专用样式 */
+@media (hover: none) and (pointer: coarse) {
+    /* 移除悬停效果，优化触摸体验 */
+    .category-btn:hover,
+    .level-btn:hover {
+        transform: none;
+        box-shadow: none;
+    }
+    
+    /* 添加触摸激活状态 */
+    .category-btn:active,
+    .level-btn:active {
+        transform: scale(0.95);
+        transition: transform 0.1s;
+    }
+    
+    /* 增大触摸目标 */
+    .category-btn,
+    .level-btn {
+        min-height: 48px;
+        min-width: 48px;
+    }
+    
+    /* 优化工具提示显示 */
+    .tooltip {
+        position: fixed;
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        max-width: 90vw;
+        max-height: 70vh;
+        overflow-y: auto;
+        z-index: 10000;
+    }
+    
+    /* 增大数据点触摸区域 */
+    .chart-container circle {
+        r: 8;
+        stroke-width: 2;
+    }
+}
+
+/* ===== 高分辨率屏幕优化 ===== */
+
+/* Retina显示屏优化 */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .quadrant-label {
+        text-shadow: 2px 2px 4px white;
+    }
+    
+    .tooltip {
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    }
+}
+
+/* ===== 横屏模式优化 ===== */
+
+/* 平板和手机横屏模式 */
+@media (max-height: 600px) and (orientation: landscape) {
+    header {
+        padding: 8px;
+    }
+    
+    h1 {
+        font-size: 1.4rem;
+        margin-bottom: 4px;
+    }
+    
+    .subtitle {
+        font-size: 0.8rem;
+        margin-bottom: 0;
+    }
+    
+    .chart-container {
+        height: 280px;
+    }
+    
+    .visualization-section,
+    .controls-section {
+        padding: 8px;
+    }
+    
+    .section-title {
+        font-size: 1rem;
+        margin-bottom: 8px;
+    }
+}
+
+/* ===== 可访问性和性能优化 ===== */
+
+/* 减少动画效果 (prefers-reduced-motion) */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* 深色模式支持 */
+@media (prefers-color-scheme: dark) {
+    body {
+        background-color: #1a1a1a;
+        color: #e0e0e0;
+    }
+    
+    .visualization-section,
+    .controls-section {
+        background-color: #2d2d2d;
+        color: #e0e0e0;
+    }
+    
+    .category-btn,
+    .level-btn {
+        background-color: #3a3a3a;
+        border-color: #555;
+        color: #e0e0e0;
+    }
+    
+    .instructions {
+        background-color: #2d3748;
+        border-left-color: #4a6fa5;
+        color: #e2e8f0;
+    }
+    
+    #dataStats {
+        background: #2d3748;
+        color: #e2e8f0;
     }
 }
 
