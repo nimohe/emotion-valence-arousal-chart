@@ -87,8 +87,13 @@
         
         .chart-container {
             width: 100%;
-            height: 600px;
+            height: 100vh;
             position: relative;
+            background-color: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            overflow: visible;
         }
         
         .controls {
@@ -198,6 +203,139 @@
             border-radius: 3px;
         }
         
+        /* 抽屉式侧边栏样式 */
+        .drawer-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1001;
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .drawer-toggle:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .drawer-toggle.active {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ff5252 100%);
+        }
+        
+        .drawer-sidebar {
+            position: fixed;
+            top: 0;
+            right: -350px;
+            width: 350px;
+            height: 100vh;
+            background: white;
+            box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15);
+            transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1000;
+            overflow-y: auto;
+            border-radius: 12px 0 0 12px;
+        }
+        
+        .drawer-sidebar.open {
+            right: 0;
+        }
+        
+        .drawer-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            z-index: 999;
+        }
+        
+        .drawer-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .drawer-content {
+            padding: 70px 20px 20px;
+            height: 100%;
+            overflow-y: auto;
+        }
+        
+        .drawer-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding: 0 10px;
+        }
+        
+        .drawer-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+            transition: color 0.2s;
+        }
+        
+        .drawer-close:hover {
+            color: #333;
+        }
+        
+        /* 全屏布局调整 */
+        .fullscreen-layout {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 0;
+        }
+        
+        .fullscreen-chart {
+            flex: 1;
+            position: relative;
+            background-color: white;
+        }
+        
+        /* 响应式优化 */
+        @media (max-width: 768px) {
+            .drawer-sidebar {
+                width: 300px;
+                right: -300px;
+            }
+            
+            .drawer-toggle {
+                width: 45px;
+                height: 45px;
+                top: 15px;
+                right: 15px;
+            }
+            
+            .drawer-content {
+                padding: 60px 15px 15px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .drawer-sidebar {
+                width: 100%;
+                right: -100%;
+            }
+        }
+        
         .data-table {
             width: 100%;
             border-collapse: collapse;
@@ -254,6 +392,34 @@
             .main-content {
                 flex-direction: column;
             }
+            
+            .emotion-text {
+                font-size: 9px !important;
+            }
+        }
+        
+        @media (max-width: 991px) {
+            .emotion-text {
+                font-size: 8px !important;
+            }
+        }
+        
+        @media (max-width: 767px) {
+            .emotion-text {
+                font-size: 7px !important;
+            }
+        }
+        
+        @media (max-width: 575px) {
+            .emotion-text {
+                font-size: 6px !important;
+            }
+        }
+        
+        @media (max-width: 375px) {
+            .emotion-text {
+                font-size: 5px !important;
+            }
         }
     </style>
 </head>
@@ -264,23 +430,28 @@
             <p class="subtitle">基于"愉悦度-唤醒度"模型的情绪词汇分布图。横轴表示愉悦度(负值:不愉悦, 正值:愉悦)，纵轴表示唤醒度(负值:平静/低落, 正值:激动/兴奋)。</p>
         </header>
         
-        <div class="main-content">
-            <div class="visualization-section">
-                <h2 class="section-title">情绪坐标分布图</h2>
-                <div class="chart-container" id="chart"></div>
-                
-                <div class="instructions">
-                    <h3>使用说明：</h3>
-                    <ul>
-                        <li>将鼠标悬停在圆点上可查看情绪词汇详情</li>
-                        <li>点击右侧的类别按钮可筛选特定情绪类别</li>
-                        <li>使用强度筛选器可查看不同强度的情绪词汇</li>
-                        <li>坐标系分为四个象限：右上(高愉悦/高唤醒)、右下(高愉悦/低唤醒)、左下(低愉悦/低唤醒)、左上(低愉悦/高唤醒)</li>
-                    </ul>
+        <!-- 抽屉切换按钮 -->
+        <button class="drawer-toggle" id="drawerToggle" title="打开控制面板">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </button>
+        
+        <!-- 抽屉遮罩层 -->
+        <div class="drawer-overlay" id="drawerOverlay"></div>
+        
+        <!-- 抽屉式侧边栏 -->
+        <aside class="drawer-sidebar" id="drawerSidebar">
+            <div class="drawer-content">
+                <div class="drawer-header">
+                    <h2 class="section-title">控制面板</h2>
+                    <button class="drawer-close" id="drawerClose" title="关闭">
+                        ×
+                    </button>
                 </div>
-            </div>
-            
-            <div class="controls-section">
+                
                 <div class="controls">
                     <h2 class="section-title">筛选控制</h2>
                     
@@ -314,11 +485,29 @@
                 
                 <div class="controls">
                     <h2 class="section-title">坐标范围</h2>
-                    <p>愉悦度(X轴)：-1.0 ~ 1.0</p>
-                    <p>唤醒度(Y轴)：-1.0 ~ 1.0</p>
+                    <p>愉悦度(X轴)：-1.5 ~ 1.5</p>
+                    <p>唤醒度(Y轴)：-1.5 ~ 1.5</p>
                     <p>坐标系中心为(0, 0)</p>
                 </div>
+                
+                <div class="controls">
+                    <h2 class="section-title">使用说明</h2>
+                    <div class="instructions">
+                        <ul>
+                            <li>将鼠标悬停在圆点上可查看情绪词汇详情</li>
+                            <li>点击类别按钮可筛选特定情绪类别</li>
+                            <li>使用强度筛选器可查看不同强度的情绪词汇</li>
+                            <li>坐标系分为四个象限：右上(高愉悦/高唤醒)、右下(高愉悦/低唤醒)、左下(低愉悦/低唤醒)、左上(低愉悦/高唤醒)</li>
+                            <li>点击右上角菜单按钮可打开/关闭控制面板</li>
+                        </ul>
+                    </div>
+                </div>
             </div>
+        </aside>
+        
+        <!-- 全屏图表区域 -->
+        <div class="fullscreen-chart">
+            <div class="chart-container" id="chart"></div>
         </div>
         
         <footer>
@@ -342,8 +531,26 @@
             initDataTable();
         }
 
+        // 坐标值等比放大函数
+        function scaleCoordinates(data, scaleFactor = 2) {
+            return data.map(category => {
+                return {
+                    ...category,
+                    words: category.words.map(word => {
+                        return {
+                            ...word,
+                            coord: [
+                                word.coord[0] * scaleFactor, // 保留两位小数
+                                word.coord[1] * scaleFactor
+                            ]
+                        };
+                    })
+                };
+            });
+        }
+
         // 情绪数据 - 从之前的JSON转换而来
-        const emotionData = [
+        const emotionData = scaleCoordinates([
   {
     "category": "快乐",
     "level": "轻微 (Mild)",
@@ -626,7 +833,7 @@
       {"word": "惊恐", "coord": [-0.8, 0.8]},
       {"word": "担心", "coord": [-0.4, 0.2]},
       {"word": "紧张", "coord": [-0.5, 0.6]},
-      {"word": "被吓到", "coord": [-0.7, 0.7]}
+      {"word": "被吓到", "coord": [-0.7, 0.8]}
     ]
   },
   {
@@ -767,7 +974,7 @@
       {"word": "被难住", "coord": [-0.5, 0.3]}
     ]
   }
-];
+], 1.5);
 
         // 颜色映射
         const colorMap = {
@@ -800,31 +1007,43 @@
             });
         });
 
-        // 设置SVG尺寸和边距
-        const margin = {top: 60, right: 20, bottom: 60, left: 60};
-        const width = 800 - margin.left - margin.right;
-        const height = 600 - margin.top - margin.bottom;
+        // 设置SVG尺寸和边距 - 实现全屏自适应
+        function updateSVGDimensions() {
+            const chartContainer = document.getElementById('chart');
+            const containerWidth = chartContainer.clientWidth;
+            const containerHeight = chartContainer.clientHeight;
+            
+            const margin = {top: 80, right: 40, bottom: 80, left: 40};
+            const width = containerWidth - margin.left - margin.right;
+            const height = containerHeight - margin.top - margin.bottom;
+            
+            return { margin, width, height, containerWidth, containerHeight };
+        }
+        
+        let svgDimensions = updateSVGDimensions();
+        let { margin, width, height, containerWidth, containerHeight } = svgDimensions;
 
         // 创建SVG容器
         const svg = d3.select("#chart")
             .append("svg")
-            .attr("width", width + margin.left + margin.right)
-            .attr("height", height + margin.top + margin.bottom)
+            .attr("width", containerWidth)
+            .attr("height", containerHeight)
+            .attr("overflow", "visible")
             .append("g")
             .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
-        // 创建缩放比例尺
+        // 创建缩放比例尺 - 将坐标系按1.5倍比例放大
         const xScale = d3.scaleLinear()
-            .domain([-1.2, 1.2])
+            .domain([-1.0 * 1.5, 1.0 * 1.5])
             .range([0, width]);
             
         const yScale = d3.scaleLinear()
-            .domain([-1.2, 1.2])
+            .domain([-1.0 * 1.5, 1.0 * 1.5])
             .range([height, 0]);
 
         // 添加坐标轴
-        const xAxis = d3.axisBottom(xScale).ticks(10);
-        const yAxis = d3.axisLeft(yScale).ticks(10);
+        const xAxis = d3.axisBottom(xScale).ticks(12);
+        const yAxis = d3.axisLeft(yScale).ticks(12);
         
         svg.append("g")
             .attr("class", "x-axis")
@@ -851,17 +1070,17 @@
             .attr("text-anchor", "middle")
             .attr("transform", "rotate(-90)")
             .attr("x", -height/2)
-            .attr("y", -40)
+            .attr("y", -40+10)
             .style("font-size", "16px")
             .style("font-weight", "bold")
             .text("唤醒度 (Arousal)");
 
         // 添加象限标签
         const quadrantLabels = [
-            {text: "高愉悦/高唤醒", x: width * 0.75, y: height * 0.25, color: "#2E7D32"},
-            {text: "低愉悦/高唤醒", x: width * 0.25, y: height * 0.25, color: "#C62828"},
-            {text: "低愉悦/低唤醒", x: width * 0.25, y: height * 0.75, color: "#6A1B9A"},
-            {text: "高愉悦/低唤醒", x: width * 0.75, y: height * 0.75, color: "#1565C0"}
+            {text: "高愉悦/高唤醒", x: width * 0.75, y: height * 0.05, color: "#2E7D32"},
+            {text: "低愉悦/高唤醒", x: width * 0.25, y: height * 0.05, color: "#C62828"},
+            {text: "低愉悦/低唤醒", x: width * 0.25, y: height * 1, color: "#6A1B9A"},
+            {text: "高愉悦/低唤醒", x: width * 0.75, y: height * 1, color: "#1565C0"}
         ];
         
         quadrantLabels.forEach(label => {
@@ -893,13 +1112,48 @@
             .attr("stroke-width", 1)
             .attr("stroke-dasharray", "5,5");
 
-        // 添加原点标签
-        svg.append("text")
-            .attr("x", width/2 + 5)
-            .attr("y", height/2 - 5)
-            .attr("fill", "#666")
-            .style("font-size", "12px")
+        // 添加原点UI元素 - 增大尺寸并增强视觉效果
+        const originGroup = svg.append("g").attr("class", "origin-group");
+        
+        // 原点圆形背景
+        originGroup.append("circle")
+            .attr("cx", width/2)
+            .attr("cy", height/2)
+            .attr("r", 8)
+            .attr("fill", "#ff6b6b")
+            .attr("stroke", "#ffffff")
+            .attr("stroke-width", 2)
+            .attr("opacity", 0.9);
+        
+        // 原点文字标签
+        originGroup.append("text")
+            .attr("x", width/2 + 15)
+            .attr("y", height/2 - 15)
+            .attr("fill", "#333333")
+            .attr("font-size", "16px")
+            .attr("font-weight", "bold")
+            .attr("text-anchor", "start")
+            .attr("dominant-baseline", "middle")
             .text("(0,0)");
+        
+        // 原点坐标线 - 增强视觉效果
+        originGroup.append("line")
+            .attr("x1", width/2 - 10)
+            .attr("x2", width/2 + 5)
+            .attr("y1", height/2)
+            .attr("y2", height/2)
+            .attr("stroke", "#ff6b6b")
+            .attr("stroke-width", 2)
+            .attr("opacity", 0.7);
+        
+        originGroup.append("line")
+            .attr("x1", width/2)
+            .attr("x2", width/2)
+            .attr("y1", height/2 - 10)
+            .attr("y2", height/2 + 5)
+            .attr("stroke", "#ff6b6b")
+            .attr("stroke-width", 2)
+            .attr("opacity", 0.7);
 
         // 创建工具提示
         const tooltip = d3.select("body")
@@ -928,21 +1182,85 @@
             const points = svg.selectAll(".emotion-point")
                 .data(filteredData, d => d.word + d.category + d.level);
             
-            // 移除旧的点
+            // 移除旧的点和文字
             points.exit().remove();
+            svg.selectAll(".emotion-text").remove();
             
             // 添加新的点
             const newPoints = points.enter()
-                .append("circle")
+                .append("g")
+                .attr("class", "emotion-group");
+            
+            // 为每个组添加圆形 - PC端增大尺寸
+            newPoints.append("circle")
                 .attr("class", "emotion-point")
-                .attr("r", 6)
+                .attr("r", 15) // 进一步增大圆形尺寸
                 .attr("cx", d => xScale(d.coord[0]))
                 .attr("cy", d => yScale(d.coord[1]))
                 .attr("fill", d => colorMap[d.category])
                 .attr("opacity", 0.8)
                 .attr("stroke", "#fff")
-                .attr("stroke-width", 1.5)
+                .attr("stroke-width", 2)
                 .style("cursor", "pointer");
+            
+            // 为每个组添加文字 - PC端增大字体，支持自动换行
+            newPoints.each(function(d) {
+                const g = d3.select(this);
+                const x = xScale(d.coord[0]);
+                const y = yScale(d.coord[1]);
+                
+                if (d.word.length >= 4) {
+                    // 超过4个字符时分成两行
+                    const midPoint = Math.ceil(d.word.length / 2);
+                    const firstLine = d.word.substring(0, midPoint);
+                    const secondLine = d.word.substring(midPoint);
+                    
+                    // 第一行文字
+                    g.append("text")
+                        .attr("class", "emotion-text emotion-text-line1")
+                        .attr("x", x)
+                        .attr("y", y - 6)
+                        .attr("text-anchor", "middle")
+                        .attr("dominant-baseline", "middle")
+                        .attr("fill", "black")
+                        .attr("font-size", "12px")
+                        .attr("font-weight", "bold")
+                        .attr("pointer-events", "none")
+                        .style("user-select", "none")
+                        .style("opacity", 0.8)
+                        .text(firstLine);
+                    
+                    // 第二行文字
+                    g.append("text")
+                        .attr("class", "emotion-text emotion-text-line2")
+                        .attr("x", x)
+                        .attr("y", y + 6)
+                        .attr("text-anchor", "middle")
+                        .attr("dominant-baseline", "middle")
+                        .attr("fill", "black")
+                        .attr("font-size", "12px")
+                        .attr("font-weight", "bold")
+                        .attr("pointer-events", "none")
+                        .style("user-select", "none")
+                        .style("opacity", 0.8)
+                        .text(secondLine);
+                } else {
+                    // 少于4个字符时显示为一行
+                    g.append("text")
+                        .attr("class", "emotion-text")
+                        .attr("x", x)
+                        .attr("y", y)
+                        .attr("text-anchor", "middle")
+                        .attr("dominant-baseline", "middle")
+                        .attr("fill", "black")
+                        .attr("font-size", "12px")
+                        .attr("font-weight", "bold")
+                        .attr("pointer-events", "none")
+                        .style("user-select", "none")
+                        .style("opacity", 0.8)
+                        .text(d.word);
+                }
+            });
             
             // 合并新旧点
             const allPoints = newPoints.merge(points);
@@ -950,12 +1268,36 @@
             // 添加交互效果
             allPoints
                 .on("mouseover", function(event, d) {
-                    // 高亮当前点
-                    d3.select(this)
+                    const circle = d3.select(this).select(".emotion-point");
+                    const texts = d3.select(this).selectAll(".emotion-text");
+                    
+                    // 高亮当前点 - PC端增大尺寸
+                    circle
                         .transition()
                         .duration(200)
-                        .attr("r", 10)
+                        .attr("r", 20)
                         .attr("opacity", 1);
+                    
+                    // 文字变大并保持白色以提高对比度 - PC端进一步增大
+                    texts
+                        .transition()
+                        .duration(200)
+                        .attr("font-size", "14px")
+                        .attr("fill", "white");
+                    
+                    // 如果是两行文字，显示完整词汇时也分成两行
+                    if (d.word.length >= 4) {
+                        const midPoint = Math.ceil(d.word.length / 2);
+                        const firstLine = d.word.substring(0, midPoint);
+                        const secondLine = d.word.substring(midPoint);
+                        
+                        // 更新第一行文字
+                        d3.select(this).select(".emotion-text-line1")
+                            .text(firstLine);
+                        // 更新第二行文字
+                        d3.select(this).select(".emotion-text-line2")
+                            .text(secondLine);
+                    }
                     
                     // 显示工具提示
                     tooltip
@@ -975,12 +1317,37 @@
                     document.getElementById("selectedPoint").textContent = `${d.word} (${d.category})`;
                 })
                 .on("mouseout", function() {
+                    const circle = d3.select(this).select(".emotion-point");
+                    const texts = d3.select(this).selectAll(".emotion-text");
+                    
                     // 恢复点大小
-                    d3.select(this)
+                    circle
                         .transition()
                         .duration(200)
-                        .attr("r", 6)
+                        .attr("r", 15)
                         .attr("opacity", 0.8);
+                    
+                    // 恢复文字大小，保持白色
+                    const d = d3.select(this).datum();
+                    texts
+                        .transition()
+                        .duration(200)
+                        .attr("font-size", "12px")
+                        .attr("fill", "black");
+                    
+                    // 如果是两行文字，恢复原始分行显示
+                    if (d.word.length >= 4) {
+                        const midPoint = Math.ceil(d.word.length / 2);
+                        const firstLine = d.word.substring(0, midPoint);
+                        const secondLine = d.word.substring(midPoint);
+                        
+                        // 恢复第一行文字
+                        d3.select(this).select(".emotion-text-line1")
+                            .text(firstLine);
+                        // 恢复第二行文字
+                        d3.select(this).select(".emotion-text-line2")
+                            .text(secondLine);
+                    }
                     
                     // 隐藏工具提示
                     tooltip
@@ -1058,12 +1425,121 @@
             });
         }
 
+        // 抽屉控制功能
+        function initDrawer() {
+            const drawerToggle = document.getElementById('drawerToggle');
+            const drawerSidebar = document.getElementById('drawerSidebar');
+            const drawerOverlay = document.getElementById('drawerOverlay');
+            const drawerClose = document.getElementById('drawerClose');
+            
+            function openDrawer() {
+                drawerSidebar.classList.add('open');
+                drawerOverlay.classList.add('active');
+                drawerToggle.classList.add('active');
+            }
+            
+            function closeDrawer() {
+                drawerSidebar.classList.remove('open');
+                drawerOverlay.classList.remove('active');
+                drawerToggle.classList.remove('active');
+            }
+            
+            drawerToggle.addEventListener('click', () => {
+                if (drawerSidebar.classList.contains('open')) {
+                    closeDrawer();
+                } else {
+                    openDrawer();
+                }
+            });
+            
+            drawerClose.addEventListener('click', closeDrawer);
+            
+            drawerOverlay.addEventListener('click', closeDrawer);
+            
+            // ESC键关闭抽屉
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && drawerSidebar.classList.contains('open')) {
+                    closeDrawer();
+                }
+            });
+        }
+        
+        // 响应式更新SVG尺寸
+        function handleResize() {
+            svgDimensions = updateSVGDimensions();
+            ({ margin, width, height, containerWidth, containerHeight } = svgDimensions);
+            
+            // 更新SVG容器尺寸
+            const svg = d3.select("#chart svg");
+            svg.attr("width", containerWidth)
+               .attr("height", containerHeight);
+            
+            svg.select("g")
+               .attr("transform", `translate(${margin.left}, ${margin.top})`);
+            
+            // 重新设置比例尺
+            xScale.range([0, width]);
+            yScale.range([height, 0]);
+            
+            // 更新坐标轴
+            svg.select(".x-axis")
+               .attr("transform", `translate(0, ${height/2})`)
+               .call(d3.axisBottom(xScale).ticks(12));
+               
+            svg.select(".y-axis")
+               .attr("transform", `translate(${width/2}, 0)`)
+               .call(d3.axisLeft(yScale).ticks(12));
+            
+            // 更新坐标轴标签
+            svg.select(".x-label")
+               .attr("x", width/2)
+               .attr("y", height + 40);
+               
+            svg.select(".y-label")
+               .attr("transform", "rotate(-90)")
+               .attr("x", -height/2);
+            
+            // 更新象限标签
+            const quadrantLabels = [
+                {text: "高愉悦/高唤醒", x: width * 0.75, y: height * 0.25, color: "#2E7D32"},
+                {text: "低愉悦/高唤醒", x: width * 0.25, y: height * 0.25, color: "#C62828"},
+                {text: "低愉悦/低唤醒", x: width * 0.25, y: height * 0.75, color: "#6A1B9A"},
+                {text: "高愉悦/低唤醒", x: width * 0.75, y: height * 0.75, color: "#1565C0"}
+            ];
+            
+            svg.selectAll(".quadrant-label")
+               .data(quadrantLabels)
+               .attr("x", d => d.x)
+               .attr("y", d => d.y);
+            
+            // 更新中心线
+            svg.select("line[x2]").attr("x2", width);
+            svg.select("line[x1]:not([x2])").attr("x1", width/2).attr("x2", width/2);
+            svg.select("line[x1][x2]:not([y1])").attr("x1", 0).attr("x2", width).attr("y1", height/2).attr("y2", height/2);
+            
+            // 更新原点元素
+            svg.select(".origin-group circle")
+               .attr("cx", width/2)
+               .attr("cy", height/2);
+               
+            svg.select(".origin-group text")
+               .attr("x", width/2 + 15)
+               .attr("y", height/2 - 15);
+            
+            // 重新绘制数据点
+            updateChart();
+        }
+        
         // 初始化页面
         function init() {
+            initDrawer();
             initCategoryFilter();
             initLevelFilter();
             initLegend();
             updateChart();
+            
+            // 添加窗口大小变化监听
+            window.addEventListener('resize', handleResize);
         }
 
         // 页面加载完成后初始化
