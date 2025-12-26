@@ -1178,36 +1178,32 @@
             document.getElementById("totalPoints").textContent = allDataPoints.length;
             document.getElementById("visiblePoints").textContent = filteredData.length;
             
-            // 绑定数据
-            const points = svg.selectAll(".emotion-point")
+            // 完整绑定数据到group元素，避免DOM操作冲突
+            const groups = svg.selectAll(".emotion-group")
                 .data(filteredData, d => d.word + d.category + d.level);
             
-            // 移除旧的点和文字
-            points.exit().remove();
-            svg.selectAll(".emotion-text").remove();
+            // 安全移除退出的组及其所有子元素
+            const exitingGroups = groups.exit();
+            exitingGroups.remove(); // D3会自动移除所有子元素
             
-            // 添加新的点
-            const newPoints = points.enter()
+            // 添加新组
+            const enteringGroups = groups.enter()
                 .append("g")
                 .attr("class", "emotion-group");
             
-            // 为每个组添加圆形 - PC端增大尺寸
-            newPoints.append("circle")
+            // 为新组添加圆形
+            enteringGroups.append("circle")
                 .attr("class", "emotion-point")
-                .attr("r", 15) // 进一步增大圆形尺寸
-                .attr("cx", d => xScale(d.coord[0]))
-                .attr("cy", d => yScale(d.coord[1]))
+                .attr("r", 15)
                 .attr("fill", d => colorMap[d.category])
                 .attr("opacity", 0.8)
                 .attr("stroke", "#fff")
                 .attr("stroke-width", 2)
                 .style("cursor", "pointer");
             
-            // 为每个组添加文字 - PC端增大字体，支持自动换行
-            newPoints.each(function(d) {
+            // 为新组添加文字
+            enteringGroups.each(function(d) {
                 const g = d3.select(this);
-                const x = xScale(d.coord[0]);
-                const y = yScale(d.coord[1]);
                 
                 if (d.word.length >= 4) {
                     // 超过4个字符时分成两行
@@ -1218,8 +1214,6 @@
                     // 第一行文字
                     g.append("text")
                         .attr("class", "emotion-text emotion-text-line1")
-                        .attr("x", x)
-                        .attr("y", y - 6)
                         .attr("text-anchor", "middle")
                         .attr("dominant-baseline", "middle")
                         .attr("fill", "black")
@@ -1227,14 +1221,11 @@
                         .attr("font-weight", "bold")
                         .attr("pointer-events", "none")
                         .style("user-select", "none")
-                        .style("opacity", 0.8)
                         .text(firstLine);
                     
                     // 第二行文字
                     g.append("text")
                         .attr("class", "emotion-text emotion-text-line2")
-                        .attr("x", x)
-                        .attr("y", y + 6)
                         .attr("text-anchor", "middle")
                         .attr("dominant-baseline", "middle")
                         .attr("fill", "black")
@@ -1242,14 +1233,11 @@
                         .attr("font-weight", "bold")
                         .attr("pointer-events", "none")
                         .style("user-select", "none")
-                        .style("opacity", 0.8)
                         .text(secondLine);
                 } else {
                     // 少于4个字符时显示为一行
                     g.append("text")
                         .attr("class", "emotion-text")
-                        .attr("x", x)
-                        .attr("y", y)
                         .attr("text-anchor", "middle")
                         .attr("dominant-baseline", "middle")
                         .attr("fill", "black")
@@ -1257,33 +1245,57 @@
                         .attr("font-weight", "bold")
                         .attr("pointer-events", "none")
                         .style("user-select", "none")
-                        .style("opacity", 0.8)
                         .text(d.word);
                 }
             });
             
-            // 合并新旧点
-            const allPoints = newPoints.merge(points);
+            // 合并所有组
+            const allGroups = enteringGroups.merge(groups);
+            
+            // 更新所有元素的位置
+            allGroups
+                .select(".emotion-point")
+                .attr("cx", d => xScale(d.coord[0]))
+                .attr("cy", d => yScale(d.coord[1]));
+            
+            // 更新文字位置
+            allGroups.each(function(d) {
+                const x = xScale(d.coord[0]);
+                const y = yScale(d.coord[1]);
+                
+                if (d.word.length >= 4) {
+                    d3.select(this).select(".emotion-text-line1")
+                        .attr("x", x)
+                        .attr("y", y - 6);
+                    d3.select(this).select(".emotion-text-line2")
+                        .attr("x", x)
+                        .attr("y", y + 6);
+                } else {
+                    d3.select(this).select(".emotion-text")
+                        .attr("x", x)
+                        .attr("y", y);
+                }
+            });
             
             // 添加交互效果
-            allPoints
+            allGroups
                 .on("mouseover", function(event, d) {
                     const circle = d3.select(this).select(".emotion-point");
                     const texts = d3.select(this).selectAll(".emotion-text");
                     
-                    // 高亮当前点 - PC端增大尺寸
+                    // 高亮当前点
                     circle
                         .transition()
                         .duration(200)
                         .attr("r", 20)
                         .attr("opacity", 1);
                     
-                    // 文字变大并保持白色以提高对比度 - PC端进一步增大
+                    // 文字变大并保持白色
                     texts
                         .transition()
                         .duration(200)
                         .attr("font-size", "14px")
-                        .attr("fill", "white");
+                        .attr("fill", "black");
                     
                     // 如果是两行文字，显示完整词汇时也分成两行
                     if (d.word.length >= 4) {
@@ -1464,10 +1476,13 @@
             });
         }
         
-        // 响应式更新SVG尺寸
+        // 响应式更新SVG尺寸 - 添加防抖处理
+        let resizeTimeout;
         function handleResize() {
-            svgDimensions = updateSVGDimensions();
-            ({ margin, width, height, containerWidth, containerHeight } = svgDimensions);
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                svgDimensions = updateSVGDimensions();
+                ({ margin, width, height, containerWidth, containerHeight } = svgDimensions);
             
             // 更新SVG容器尺寸
             const svg = d3.select("#chart svg");
@@ -1528,6 +1543,7 @@
             
             // 重新绘制数据点
             updateChart();
+            }, 150); // 防抖延迟150ms
         }
         
         // 初始化页面
